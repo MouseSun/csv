@@ -3,6 +3,7 @@ package csv
 import (
 	"encoding/csv"
 	"fmt"
+	"io"
 	"os"
 )
 
@@ -30,6 +31,27 @@ func (reader *CsvReader) Next() ([]string, error) {
 	}
 
 	return line, nil
+}
+
+func (reader *CsvReader) NextRows(rows int) (records [][]string, err error) {
+	count := 0
+	for {
+		if count >= rows {
+			return records, nil
+		}
+
+		record, err := reader.Reader.Read()
+		if err == io.EOF {
+			return records, nil
+		}
+
+		if err != nil {
+			return nil, err
+		}
+
+		records = append(records, record)
+		count = count + 1
+	}
 }
 
 func checkError(err error) bool {
